@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href = "myCss.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        
+        const apikey = "0a36a516f1bec217908054fbdefcb3f7";
+        var lat;
+        var lon;
+
+        // 페이지가 로딩 되지마차 호출 되는 함수
+        $('document').ready(function() {
+            navigator.geolocation.getCurrentPosition(handleGeoSuccess, handleGeoError);
+            
+            
+            
+            function handleGeoSuccess(position) {
+                lat = position.coords.latitude;
+                lon = position.coords.longitude;
+                
+                $.ajax({
+                    type: "GET",
+                    url: `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apikey}`,
+                    data : {},
+                    success : function (response) {
+                        console.log(response);
+                        
+                        $('.City').append(response["name"]);
+                        $('.Weather').append(response["weather"][0]["description"]);
+                        $('.cur_temp').append(Math.floor(response["main"]["temp"] - 273.15)).append(" 'C");
+                        $('.cur_high_temp').append(Math.floor(response["main"]["temp_max"] - 273.15)).append(" 'C");
+                        $('.cur_low_temp').append(Math.floor(response["main"]["temp_min"] - 273.15)).append(" 'C");
+                        $('.cur_temp_diff').append(Math.floor(response["main"]["temp_max"] - response["main"]["temp_min"])).append(" 'C");
+                        console.log(response["name"]);
+                    }
+                })
+            }
+            
+            function handleGeoError() {
+                console.log("can not access api");
+            }
+            
+            
+        });
+    </script>
+    
+    <title>Weather - Website</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <div class="container w-7 my-5 p-5 bg-warning text-center shadow">
+    <div>
+    <h1 class = "title">Hello World!</h1>
+    <h2 class = "City">Current Area : </h2>
+    <h3 class = "Weather">Current Weather : </h3>
+    </div>
+
+    <div>
+    <ul id = "temps">
+        <li class="cur_temp">현재 온도 : </li>
+        <li class="cur_high_temp">최고 온도 : </li>
+        <li class="cur_low_temp">최저 온도 : </li>
+        <li class="cur_temp_diff">일교차 : </li>
+    </ul>
+    </div>
+    
+    <h3>검색하고 싶은 도시의 위도와 경도</h3>
+    <label for="latitude">latitude : </label>
+    <input type = "text" id="latitude">
+    <label for="longitude">longitude : </label>
+    <input type = "text" id="longitude">
+
+    <button id = "get">api 요청하기</button>
+    <ui id = "searchs">
+        <h2 class="search_area">Area : </h2>
+        <h3 class="search_weather">Weather : </h3>
+        <li class = "search_temp">현재 온도 : </li>
+        <li class="search_high">최고 온도 : </li>
+        <li class="search_low">최저 온도 : </li>
+        <li class="search_diff">일교차 : </li>
+    </ui>
+    
+    <script>
+        $("#get").click(function() {
+        alert("button clicked!");
+        
+        var find_lat = $("#latitude").val();
+        var find_lon = $("#longitude").val();
+        var postData = '';
+
+        $.ajax({
+        type: "GET",
+        url: `http://api.openweathermap.org/data/2.5/weather?lat=${find_lat}&lon=${find_lon}&appid=${apikey}`,
+        data : {},
+        success : function (response) {
+
+            console.log(response);
+            let temperature = (response["main"]["temp"] - 273.15); 
+            let temperatureMax = response["main"]["temp_max"] - 273.15;
+            let temperatureMin =response["main"]["temp_min"] - 273.15;
+            let temp_range = temperatureMax - temperatureMin
+            console.log("도시" , response["name"]);
+            console.log("현재 온도:", temperature);
+            console.log("최고 온도:", temperatureMax);
+            console.log("최저 온도:", temperatureMin);
+            console.log("일교차:", temp_range);
+            
+            $('.search_area').text('Area : ' + response["name"]);
+            $('.search_weather').text('Weather : ' + response["weather"][0]["description"]);
+            $('.search_temp').text('현재 온도 : ' +  Math.floor(response["main"]["temp"] - 273.15) + " 'C");
+            $('.search_high').text('최고 온도 : ' + Math.floor(response["main"]["temp_max"] - 273.15) + " 'C");
+            $('.search_low').text('최저 온도 : ' + Math.floor(response["main"]["temp_min"] - 273.15) + " 'C");
+            $('.search_diff').text('일교차 : ' + Math.floor(response["main"]["temp_max"] - response["main"]["temp_min"]) + " 'C");
+
+
+            postData += response["name"] + '\n';
+            postData += temperature + '\n';
+            postData += temperatureMax + '\n';
+            postData += temperatureMin + '\n';
+            postData += temp_range + '\n';
+
+
+            $("temps").empty();
+            
+            $.ajax({
+                type: 'POST',
+                url: '/submit',
+                data : postData,
+                success : function (response) {
+                    alert (response);
+                    console.log(postData);
+                },
+
+                error : function() {
+                    alert ('Failed to submit data');
+                    console.log(postData);
+                }
+
+            });
+        },
+
+
+        error : function(err) {
+            alert("an error");
+        }
+        });
+        
+        
+    });
+    </script>
+    </div>
+</body>
+
+
+
+</html>
