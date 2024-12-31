@@ -3,7 +3,7 @@ $("#get").click(function() {
 
     $.ajax({
         type: "GET",
-        url: "http://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=0a36a516f1bec217908054fbdefcb3f7",
+        url: "http://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=enter openweather api id",
         data : {},
         success : function (response) {
             let temperature = (response["main"]["temp"] - 273.15); 
